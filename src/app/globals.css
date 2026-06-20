@@ -59,7 +59,7 @@
 	--primary-foreground: oklch(0.99 0 0);
 	--secondary: oklch(0.965 0.008 247);
 	--secondary-foreground: oklch(0.22 0.03 264);
-	--radius: 0.15rem;
+	--radius: 0.35rem;
 	--card: rgb(255, 255, 255);
 	--card-foreground: rgb(38, 38, 38);
 	--popover: rgb(255, 255, 255);
