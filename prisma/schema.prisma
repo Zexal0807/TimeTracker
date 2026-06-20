@@ -1,0 +1,15 @@
+datasource db {
+  provider = "sqlite"
+}
+
+generator client {
+    provider = "prisma-client"
+    output   = "../src/lib/prisma/generated/"
+}
+
+model Client {
+  idClient        Int           @id @default(autoincrement())
+  name            String
+  color           String        @default("#3B82F6")
+}
+

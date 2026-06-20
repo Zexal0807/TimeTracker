@@ -1,0 +1,6 @@
+-- CreateTable
+CREATE TABLE "Client" (
+    "idClient" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    "name" TEXT NOT NULL,
+    "color" TEXT NOT NULL DEFAULT '#3B82F6'
+);
