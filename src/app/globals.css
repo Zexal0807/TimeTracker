@@ -55,11 +55,11 @@
 :root {
 	--background: rgb(255, 255, 255);
 	--foreground: rgb(30, 33, 40);
-	--primary: rgb(9, 115, 243);
-	--primary-foreground: rgb(252, 252, 252);
-	--secondary: rgb(108, 117, 125);
-	--secondary-foreground: rgb(241, 245, 255);
-	--radius: 0.45rem;
+	--primary: oklch(0.58 0.21 258);
+	--primary-foreground: oklch(0.99 0 0);
+	--secondary: oklch(0.965 0.008 247);
+	--secondary-foreground: oklch(0.22 0.03 264);
+	--radius: 0.15rem;
 	--card: rgb(255, 255, 255);
 	--card-foreground: rgb(38, 38, 38);
 	--popover: rgb(255, 255, 255);
@@ -81,19 +81,14 @@
 	--chart-4: color-mix(in srgb, var(--primary) 60%, white);
 	--chart-5: color-mix(in srgb, var(--primary) 50%, white);
 
-	--sidebar: var(--primary);
-	--sidebar-background: var(--primary);
-	--sidebar-foreground: var(--primary-foreground);
-
-	--sidebar-primary: var(--primary-foreground);
-	--sidebar-primary-foreground: var(--primary);
-
-	--sidebar-accent: color-mix(in srgb, var(--primary) 85%, black);
-	--sidebar-accent-foreground: var(--primary-foreground);
-
-	--sidebar-border: color-mix(in srgb, var(--primary) 85%, black);
-	--sidebar-ring: color-mix(in srgb, var(--primary) 18%, white);
-	--sidebar-muted: color-mix(in srgb, var(--primary) 30%, white);
+	--sidebar: oklch(0.985 0.004 247);
+	--sidebar-foreground: oklch(0.17 0.02 264);
+	--sidebar-primary: oklch(0.58 0.21 258);
+	--sidebar-primary-foreground: oklch(0.99 0 0);
+	--sidebar-accent: oklch(0.95 0.03 258);
+	--sidebar-accent-foreground: oklch(0.35 0.15 258);
+	--sidebar-border: oklch(0.92 0.01 255);
+	--sidebar-ring: oklch(0.58 0.21 258);
 }
 
 @layer base {

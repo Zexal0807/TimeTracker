@@ -1,8 +1,8 @@
 "use client";
 import * as React from "react";
+import { Slot } from "@radix-ui/react-slot";
 import { cva } from "class-variance-authority";
 import { PanelLeftIcon } from "lucide-react";
-import { Slot } from "radix-ui";
 
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
@@ -346,22 +346,22 @@ function SidebarGroup({ className, ...props }) {
 		<div
 			data-slot="sidebar-group"
 			data-sidebar="group"
-			className={cn("relative flex w-full min-w-0 flex-col p-0", className)}
+			className={cn("relative flex w-full min-w-0 flex-col p-2", className)}
 			{...props}
 		/>
 	);
 }
 
 function SidebarGroupLabel({ className, asChild = false, ...props }) {
-	const Comp = asChild ? Slot.Root : "div";
+	const Comp = asChild ? Slot : "div";
 
 	return (
 		<Comp
 			data-slot="sidebar-group-label"
 			data-sidebar="group-label"
 			className={cn(
-				"flex h-8 shrink-0 items-center rounded-md px-2 text-xs font-medium text-sidebar-foreground/70 outline-hidden ring-sidebar-ring transition-[margin,opacity] duration-200 ease-linear focus-visible:ring-2 [&>svg]:size-4 [&>svg]:shrink-0",
-				"group-data-[collapsible=icon]:-mt-8 group-data-[collapsible=icon]:opacity-0 group-data-[collapsible=icon]:pointer-events-none",
+				"text-sidebar-foreground/70 ring-sidebar-ring flex h-8 shrink-0 items-center rounded-md px-2 text-xs font-medium outline-hidden transition-[margin,opacity] duration-200 ease-linear focus-visible:ring-2 [&>svg]:size-4 [&>svg]:shrink-0",
+				"group-data-[collapsible=icon]:-mt-8 group-data-[collapsible=icon]:opacity-0",
 				className,
 			)}
 			{...props}
@@ -370,7 +370,7 @@ function SidebarGroupLabel({ className, asChild = false, ...props }) {
 }
 
 function SidebarGroupAction({ className, asChild = false, ...props }) {
-	const Comp = asChild ? Slot.Root : "button";
+	const Comp = asChild ? Slot : "button";
 
 	return (
 		<Comp
@@ -452,7 +452,7 @@ function SidebarMenuButton({
 	className,
 	...props
 }) {
-	const Comp = asChild ? Slot.Root : "button";
+	const Comp = asChild ? Slot : "button";
 	const { isMobile, state } = useSidebar();
 
 	const button = (
@@ -490,7 +490,7 @@ function SidebarMenuButton({
 }
 
 function SidebarMenuAction({ className, asChild = false, showOnHover = false, ...props }) {
-	const Comp = asChild ? Slot.Root : "button";
+	const Comp = asChild ? Slot : "button";
 
 	return (
 		<Comp
@@ -592,7 +592,7 @@ function SidebarMenuSubButton({
 	className,
 	...props
 }) {
-	const Comp = asChild ? Slot.Root : "a";
+	const Comp = asChild ? Slot : "a";
 
 	return (
 		<Comp
