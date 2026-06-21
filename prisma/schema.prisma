@@ -19,7 +19,7 @@ model Project {
     idProject       Int             @id @default(autoincrement())
     name            String
     color           String          @default("#3B82F6")
-    hourly_rate     Decimal
+    hourlyRate      Decimal
     notes           String
 
     idClient        Int           

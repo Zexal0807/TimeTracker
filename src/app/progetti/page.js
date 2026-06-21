@@ -7,6 +7,8 @@ import { useEffect, useState } from "react";
 import { Pencil, Plus, Trash2 } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 
 const PRESET_COLORS = [
     "#3b82f6",
@@ -22,8 +24,25 @@ const PRESET_COLORS = [
 export default function ProjectsPage() {
 
     const [projects, setProjects] = useState([])
+    const [clients, setClients] = useState([])
 
     useEffect(() => {
+        const fetchClients = async () => {
+            const response = await fetch(`/api/clients`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+
+            if (!response.ok) {
+                throw new Error(`Server error: ${response.status}`)
+            }
+
+            const data = await response.json();
+            setClients(data);
+        }
+        fetchClients();
         const fetchProjects = async () => {
             const response = await fetch(`/api/projects`, {
                 method: 'GET',
@@ -42,13 +61,13 @@ export default function ProjectsPage() {
         fetchProjects();
     }, [])
 
-    const createProject = async (client) => {
+    const createProject = async (project) => {
         const response = await fetch(`/api/projects`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify(client)
+            body: JSON.stringify(project)
         })
 
         if (!response.ok) {
@@ -59,13 +78,13 @@ export default function ProjectsPage() {
         setProjects((c) => [...c, data]);
     }
 
-    const updateProject = async (client) => {
-        const response = await fetch(`/api/projects/${client.idProject}`, {
+    const updateProject = async (project) => {
+        const response = await fetch(`/api/projects/${project.idProject}`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify(client)
+            body: JSON.stringify(project)
         })
 
         if (!response.ok) {
@@ -73,11 +92,11 @@ export default function ProjectsPage() {
         }
 
         const data = await response.json();
-        setProjects((c) => c.map(x => x.idProject == client.idProject ? data : x));
+        setProjects((c) => c.map(x => x.idProject == project.idProject ? data : x));
     }
 
-    const deleteProject = async (client) => {
-        const response = await fetch(`/api/projects/${client.idProject}`, {
+    const deleteProject = async (project) => {
+        const response = await fetch(`/api/projects/${project.idProject}`, {
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json'
@@ -89,7 +108,7 @@ export default function ProjectsPage() {
         }
 
         const data = await response.json();
-        setProjects((c) => c.filter(x => x.idProject != client.idProject));
+        setProjects((c) => c.filter(x => x.idProject != project.idProject));
     }
 
     return (
@@ -98,18 +117,19 @@ export default function ProjectsPage() {
                 <div>
                     <h1 className="text-3xl font-semibold tracking-tight">Progetti</h1>
                     <p className="text-muted-foreground mt-1">
-                        Organizza i progetti dei tuoi clienti.
+                        Organizza i progetti dei tuoi projecti.
                     </p>
                 </div>
-                <ProjectDialog mode="create" onSubmit={createProject} />
+                <ProjectDialog mode="create" onSubmit={createProject} clients={clients} />
             </header>
             <Card className="divide-y mt-4 p-0 gap-0">
                 {projects.map((c) => (
                     <ProjectRow
                         key={c.idProject}
-                        client={c}
+                        project={c}
                         updateProject={updateProject}
                         deleteProject={deleteProject}
+                        clients={clients}
                     />
                 ))}
             </Card>
@@ -118,21 +138,21 @@ export default function ProjectsPage() {
 }
 
 
-function ProjectRow({ client, updateProject, deleteProject }) {
+function ProjectRow({ project, updateProject, deleteProject, clients }) {
     return (
         <div className="flex items-center gap-3 px-4 py-3">
             <span
                 className="h-3 w-3 rounded-full"
-                style={{ background: client.color }}
+                style={{ background: project.color }}
             />
-            <div className="flex-1 font-medium">{client.name}</div>
-            <ProjectDialog mode="edit" client={client} onSubmit={updateProject} />
+            <div className="flex-1 font-medium">{project.name}</div>
+            <ProjectDialog mode="edit" project={project} onSubmit={updateProject} clients={clients} />
             <Button
                 size="icon"
                 variant="ghost"
                 onClick={() => {
-                    if (confirm(`Eliminare "${client.name}"? Verranno rimossi anche le attività.`)) {
-                        deleteProject(client)
+                    if (confirm(`Eliminare "${project.name}"? Verranno rimossi anche le attività.`)) {
+                        deleteProject(project)
                     }
                 }}
             >
@@ -144,12 +164,16 @@ function ProjectRow({ client, updateProject, deleteProject }) {
 
 function ProjectDialog({
     mode,
-    client,
+    project,
+    clients,
     onSubmit = async () => { }
 }) {
     const [open, setOpen] = useState(false);
-    const [name, setName] = useState(client?.name ?? "");
-    const [color, setColor] = useState(client?.color ?? PRESET_COLORS[0]);
+    const [name, setName] = useState(project?.name ?? "");
+    const [idClient, setIdClient] = useState(project?.idClient ?? "");
+    const [hourlyRate, setHourlRate] = useState(String(project?.hourly_rate ?? "28"));
+    const [color, setColor] = useState(project?.color ?? PRESET_COLORS[0]);
+    const [notes, setNotes] = useState(project?.notes ?? "");
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
@@ -173,11 +197,35 @@ function ProjectDialog({
                 </DialogHeader>
                 <div className="space-y-4">
                     <div>
-                        <Label>Nome</Label>
+                        <Label>Cliente</Label>
+                        <Select value={idClient} onValueChange={setIdClient}>
+                            <SelectTrigger className="w-full">
+                                <SelectValue placeholder="Seleziona cliente" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {clients?.map((c) => (
+                                    <SelectItem key={c.idClient} value={c.idClient}>
+                                        {c.name}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
+                    <div>
+                        <Label>Nome progetto</Label>
                         <Input
                             value={name}
                             onChange={(e) => setName(e.target.value)}
                             placeholder="Es. Creazione sito web"
+                        />
+                    </div>
+                    <div>
+                        <Label>Tariffa oraria (€)</Label>
+                        <Input
+                            type="number"
+                            step="0.01"
+                            value={hourlyRate}
+                            onChange={(e) => setHourlRate(e.target.value)}
                         />
                     </div>
                     <div>
@@ -197,14 +245,26 @@ function ProjectDialog({
                             ))}
                         </div>
                     </div>
+                    <div>
+                        <Label>Annotazioni</Label>
+                        <Textarea
+                            value={notes}
+                            onChange={(e) => setNotes(e.target.value)}
+                            placeholder="Note interne sul progetto, link, contatti…"
+                            rows={4}
+                        />
+                    </div>
                 </div>
                 <DialogFooter>
                     <Button
                         onClick={async () => {
                             await onSubmit({
-                                idProject: client.idProject,
+                                idProject: project?.idProject,
                                 name,
-                                color
+                                idClient,
+                                color,
+                                hourlyRate,
+                                notes
                             });
                             setOpen(false)
                         }}

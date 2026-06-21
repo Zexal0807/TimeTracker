@@ -202,7 +202,7 @@ function ClientDialog({
                     <Button
                         onClick={async () => {
                             await onSubmit({
-                                idClient: client.idClient,
+                                idClient: client?.idClient,
                                 name,
                                 color
                             });

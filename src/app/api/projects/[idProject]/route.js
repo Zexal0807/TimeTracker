@@ -42,7 +42,7 @@ export async function PUT(request, { params }) {
         const idProject = parseInt((await params).idProject)
 
         const body = await request.json()
-        const { name, color, hourly_rate, notes, idClient } = body
+        const { name, color, hourlyRate, notes, idClient } = body
 
         if (isNaN(idProject)) {
             return NextResponse.json(
@@ -58,9 +58,9 @@ export async function PUT(request, { params }) {
             )
         }
 
-        if (hourly_rate === undefined || hourly_rate === null || isNaN(Number(hourly_rate))) {
+        if (hourlyRate === undefined || hourlyRate === null || isNaN(Number(hourlyRate))) {
             return NextResponse.json(
-                { error: 'Il campo hourly_rate è obbligatorio e deve essere numerico' },
+                { error: 'Il campo hourlyRate è obbligatorio e deve essere numerico' },
                 { status: 400 }
             )
         }
@@ -84,7 +84,7 @@ export async function PUT(request, { params }) {
             data: {
                 name: name.trim(),
                 color: color?.trim() || undefined,
-                hourly_rate: Number(hourly_rate),
+                hourlyRate: Number(hourlyRate),
                 notes: notes.trim(),
                 idClient: Number(idClient),
             },
