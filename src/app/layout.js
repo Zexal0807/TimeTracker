@@ -4,7 +4,7 @@ import "./globals.css";
 
 import { Sidebar, SidebarContent, SidebarHeader, SidebarInset, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarProvider } from "@/components/ui/sidebar";
 import Link from "next/link";
-import { FolderKanban, Users } from "lucide-react";
+import { BarChart3, Calendar, FolderKanban, Layout, Users } from "lucide-react";
 import { usePathname } from "next/navigation";
 
 export default function RootLayout({ children }) {
@@ -27,6 +27,22 @@ export default function RootLayout({ children }) {
                         </SidebarHeader>
                         <SidebarContent className="p-2">
                             <SidebarMenu>
+                                <SidebarMenuItem key="dashboard">
+                                    <SidebarMenuButton asChild tooltip="Dashboard" isActive={isActive("/")}>
+                                        <Link href="/">
+                                            <Layout className="h-4 w-4" />
+                                            <span>Dashboard</span>
+                                        </Link>
+                                    </SidebarMenuButton>
+                                </SidebarMenuItem>
+                                <SidebarMenuItem key="calendar">
+                                    <SidebarMenuButton asChild tooltip="Calendario" isActive={isActive("/calendario")}>
+                                        <Link href="/calendario">
+                                            <Calendar className="h-4 w-4" />
+                                            <span>Calendario</span>
+                                        </Link>
+                                    </SidebarMenuButton>
+                                </SidebarMenuItem>
                                 <SidebarMenuItem key="clients">
                                     <SidebarMenuButton asChild tooltip="Clienti" isActive={isActive("/clienti")}>
                                         <Link href="/clienti">
@@ -40,6 +56,14 @@ export default function RootLayout({ children }) {
                                         <Link href="/progetti">
                                             <FolderKanban className="h-4 w-4" />
                                             <span>Progetti</span>
+                                        </Link>
+                                    </SidebarMenuButton>
+                                </SidebarMenuItem>
+                                <SidebarMenuItem key="statistics">
+                                    <SidebarMenuButton asChild tooltip="Statistiche" isActive={isActive("/statistiche")}>
+                                        <Link href="/statistiche">
+                                            <BarChart3 className="h-4 w-4" />
+                                            <span>Statistiche</span>
                                         </Link>
                                     </SidebarMenuButton>
                                 </SidebarMenuItem>

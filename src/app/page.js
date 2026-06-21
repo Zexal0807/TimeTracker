@@ -3,10 +3,15 @@
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card"
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
-import { formatDuration } from "@/lib/format";
-import { Check, Copy, MoreHorizontal, Trash2 } from "lucide-react";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
+
+import { formatCurrency, formatDuration } from "@/lib/format";
+import { Check, Copy, MoreHorizontal, Pencil, Trash2 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react"
 
 function dayLabel(d) {
@@ -167,6 +172,7 @@ export default function HomePage() {
                                     <TaskRow
                                         key={task.idTask}
                                         task={task}
+                                        projects={projects}
                                         deleteTask={deleteTask}
                                         updateTask={updateTask}
                                         duplicateTask={() => { createTask({ ...task, paid: false }) }}
@@ -181,8 +187,7 @@ export default function HomePage() {
     );
 }
 
-
-function TaskRow({ task, updateTask, deleteTask, duplicateTask }) {
+function TaskRow({ task, projects, updateTask, deleteTask, duplicateTask }) {
 
     const [startTime, setStartTime] = useState(task.startDateTime.substr(11, 8))
     useEffect(() => {
@@ -204,6 +209,7 @@ function TaskRow({ task, updateTask, deleteTask, duplicateTask }) {
         );
     }, [task.endDateTime]);
 
+    const [editing, setEditing] = useState(false);
 
     return (
         <div className="flex items-center gap-3 px-4 py-2.5 hover:bg-muted/40 transition-colors">
@@ -266,13 +272,8 @@ function TaskRow({ task, updateTask, deleteTask, duplicateTask }) {
                         className="w-40 h-8 px-2 font-mono tabular-nums"
                     />
                 </div>
-                <div className="text-right shrink-0">
-                    <div className="font-mono tabular-nums font-semibold">
-                        {formatDuration(new Date(task.endDateTime) / 1000 - new Date(task.startDateTime) / 1000)}
-                    </div>
-                    <div className="text-xs text-muted-foreground">
-                        {/* {formatCurrency(earnings)} */}
-                    </div>
+                <div className="font-mono tabular-nums font-semibold">
+                    {formatDuration(new Date(task.endDateTime) / 1000 - new Date(task.startDateTime) / 1000)}
                 </div>
             </div>
             <div className="w-15/100 flex items-center justify-between">
@@ -284,7 +285,8 @@ function TaskRow({ task, updateTask, deleteTask, duplicateTask }) {
                     )
                     : (
                         <Badge variant="outline">Da incassare</Badge>
-                    )}
+                    )
+                }
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                         <Button size="icon" variant="ghost" className="h-8 w-8">
@@ -295,9 +297,9 @@ function TaskRow({ task, updateTask, deleteTask, duplicateTask }) {
                         <DropdownMenuItem onClick={duplicateTask}>
                             <Copy className="h-4 w-4" /> Duplica
                         </DropdownMenuItem>
-                        {/* <DropdownMenuItem onClick={() => setEditing(true)}>
-                            <Pencil className="h-4 w-4" /> Modifica completa
-                        </DropdownMenuItem> */}
+                        <DropdownMenuItem onClick={() => setEditing(true)}>
+                            <Pencil className="h-4 w-4" /> Modifica
+                        </DropdownMenuItem>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem
                             className="text-destructive focus:text-destructive"
@@ -311,14 +313,108 @@ function TaskRow({ task, updateTask, deleteTask, duplicateTask }) {
                         </DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>
-                {/* {editing && (
-                <EditEntryDialog
-                    task={task}
-                    open={editing}
-                    onOpenChange={setEditing}
-                />
-            )} */}
+                {editing && (
+                    <TaskDialog
+                        task={task}
+                        projects={projects}
+                        open={editing}
+                        onOpenChange={setEditing}
+                        onSubmit={updateTask}
+                    />
+                )}
             </div>
         </div>
+    );
+}
+
+function TaskDialog({
+    task,
+    projects,
+    open,
+    onOpenChange,
+    onSubmit
+}) {
+
+    const [name, setName] = useState(task.name ?? "");
+    const [startDateTime, setStartDateTime] = useState(task.startDateTime);
+    const [endDateTime, setEndDateTime] = useState(task.endDateTime);
+    const [idProject, setIdProject] = useState(task.idProject ?? "");
+    const [paid, setPaid] = useState(task.paid ?? false);
+
+    return (
+        <Dialog open={open} onOpenChange={onOpenChange}>
+            <DialogContent>
+                <DialogHeader>
+                    <DialogTitle>Modifica attività</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4">
+                    <div>
+                        <Label>Nome attività</Label>
+                        <Input
+                            value={name}
+                            onChange={(e) => setName(e.target.value)}
+                        />
+                    </div>
+                    <div>
+                        <Label>Progetto</Label>
+                        <Select value={idProject} onValueChange={setIdProject}>
+                            <SelectTrigger className="w-full">
+                                <SelectValue placeholder="Seleziona progetto" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {projects?.map((p) => (
+                                    <SelectItem key={p.idProject} value={p.idProject}>
+                                        {p.name} ({p.client.name}) - {formatCurrency(p.hourlyRate)}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                        <div>
+                            <Label>Inizio</Label>
+                            <Input
+                                type="datetime-local"
+                                value={startDateTime}
+                                onChange={(e) => setStartDateTime(e.target.value)}
+                            />
+                        </div>
+                        <div>
+                            <Label>Fine</Label>
+                            <Input
+                                type="datetime-local"
+                                value={endDateTime}
+                                onChange={(e) => setEndDateTime(e.target.value)}
+                            />
+                        </div>
+                    </div>
+                    <div className="flex items-center justify-between rounded-md border p-3">
+                        <Label htmlFor="paid">Saldato</Label>
+                        <Switch
+                            id="paid"
+                            checked={paid}
+                            onCheckedChange={setPaid}
+                        />
+                    </div>
+                </div>
+                <DialogFooter>
+                    <Button
+                        onClick={() => {
+                            onSubmit({
+                                ...task,
+                                name,
+                                startDateTime,
+                                endDateTime,
+                                idProject,
+                                paid
+                            })
+                            onOpenChange(false)
+                        }}
+                    >
+                        Salva
+                    </Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
     );
 }
