@@ -118,7 +118,7 @@ export default function ProjectsPage() {
                 <div>
                     <h1 className="text-3xl font-semibold tracking-tight">Progetti</h1>
                     <p className="text-muted-foreground mt-1">
-                        Organizza i progetti dei tuoi projecti.
+                        Gestisci i progetti dei tuoi clienti.
                     </p>
                 </div>
                 <ProjectDialog mode="create" onSubmit={createProject} clients={clients} />
