@@ -81,16 +81,13 @@ export default function HomePage() {
         );
     }, [tasks])
 
-
-
-
-    const createClient = async (client) => {
-        const response = await fetch(`/api/clients`, {
+    const createTask = async (task) => {
+        const response = await fetch(`/api/tasks`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify(client)
+            body: JSON.stringify(task)
         })
 
         if (!response.ok) {
@@ -98,7 +95,7 @@ export default function HomePage() {
         }
 
         const data = await response.json();
-        setClients((c) => [...c, data]);
+        setTasks((c) => [...c, data]);
     }
 
     const updateClient = async (client) => {
@@ -171,6 +168,7 @@ export default function HomePage() {
                                         key={task.idTask}
                                         task={task}
                                         deleteTask={deleteTask}
+                                        duplicateTask={() => { createTask({ ...task, paid: false }) }}
                                     />
                                 ))}
                             </div>
@@ -247,9 +245,7 @@ function TaskRow({ task, updateTask, deleteTask, duplicateTask }) {
                         </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                        <DropdownMenuItem
-                        // onClick={onDuplicate}
-                        >
+                        <DropdownMenuItem onClick={duplicateTask}>
                             <Copy className="h-4 w-4" /> Duplica
                         </DropdownMenuItem>
                         {/* <DropdownMenuItem onClick={() => setEditing(true)}>
