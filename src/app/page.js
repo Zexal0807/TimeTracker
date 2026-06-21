@@ -98,13 +98,13 @@ export default function HomePage() {
         setTasks((c) => [...c, data]);
     }
 
-    const updateClient = async (client) => {
-        const response = await fetch(`/api/clients/${client.idClient}`, {
+    const updateTask = async (task) => {
+        const response = await fetch(`/api/tasks/${task.idTask}`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify(client)
+            body: JSON.stringify(task)
         })
 
         if (!response.ok) {
@@ -112,7 +112,7 @@ export default function HomePage() {
         }
 
         const data = await response.json();
-        setClients((c) => c.map(x => x.idClient == client.idClient ? data : x));
+        setTasks((c) => c.map(x => x.idTask == task.idTask ? data : x));
     }
 
     const deleteTask = async (task) => {
@@ -168,6 +168,7 @@ export default function HomePage() {
                                         key={task.idTask}
                                         task={task}
                                         deleteTask={deleteTask}
+                                        updateTask={updateTask}
                                         duplicateTask={() => { createTask({ ...task, paid: false }) }}
                                     />
                                 ))}
@@ -183,8 +184,26 @@ export default function HomePage() {
 
 function TaskRow({ task, updateTask, deleteTask, duplicateTask }) {
 
-    const [startDateTime, setStartDateTime] = useState(new Date(task.startDateTime))
-    const [endDateTime, setEndDateTime] = useState(task.endDateTime)
+    const [startTime, setStartTime] = useState(task.startDateTime.substr(11, 8))
+    useEffect(() => {
+        if (!task.startDateTime) return setStartTime("");
+
+        const d = new Date(task.startDateTime);
+        setStartTime(
+            `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`
+        );
+    }, [task.startDateTime]);
+
+    const [endTime, setEndTime] = useState(task.endDateTime.substr(11, 8))
+    useEffect(() => {
+        if (!task.endDateTime) return setEndTime("");
+
+        const d = new Date(task.endDateTime);
+        setEndTime(
+            `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`
+        );
+    }, [task.endDateTime]);
+
 
     return (
         <div className="flex items-center gap-3 px-4 py-2.5 hover:bg-muted/40 transition-colors">
@@ -207,15 +226,43 @@ function TaskRow({ task, updateTask, deleteTask, duplicateTask }) {
                 <div className="hidden sm:flex items-center gap-1 text-sm">
                     <Input
                         type="time"
-                        value={startDateTime}
-                        onChange={(ev) => setStartDateTime(ev.target.value)}
+                        value={startTime}
+                        onChange={(ev) => setStartTime(ev.target.value)}
+                        onBlur={() => {
+                            const date = task.startDateTime?.slice(0, 10) || "";
+                            if (!date || !startTime) return;
+
+                            const d = new Date(task.startDateTime);
+                            const [hh, mm] = startTime.split(":");
+
+                            d.setHours(Number(hh), Number(mm), 0, 0);
+
+                            updateTask({
+                                ...task,
+                                startDateTime: d.toISOString(),
+                            });
+                        }}
                         className="w-40 h-8 px-2 font-mono tabular-nums"
                     />
                     <span className="text-muted-foreground">–</span>
                     <Input
                         type="time"
-                        value={endDateTime}
-                        onChange={(ev) => setEndDateTime(ev.target.value)}
+                        value={endTime}
+                        onChange={(ev) => setEndTime(ev.target.value)}
+                        onBlur={() => {
+                            const date = task.endDateTime?.slice(0, 10) || "";
+                            if (!date || !endTime) return;
+
+                            const d = new Date(task.endDateTime);
+                            const [hh, mm] = endTime.split(":");
+
+                            d.setHours(Number(hh), Number(mm), 0, 0);
+
+                            updateTask({
+                                ...task,
+                                endDateTime: d.toISOString(),
+                            });
+                        }}
                         className="w-40 h-8 px-2 font-mono tabular-nums"
                     />
                 </div>
