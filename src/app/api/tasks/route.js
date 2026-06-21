@@ -4,12 +4,16 @@ import { prisma } from '@/lib/prisma'
 export async function GET() {
     try {
         const tasks = await prisma.task.findMany({
-            // include: {
-            //     project: true,
-            // },
-            // orderBy: {
-            //     startDateTime: 'desc',
-            // },
+            include: {
+                project: {
+                    include: {
+                        client: true
+                    }
+                },
+            },
+            orderBy: {
+                startDateTime: 'desc',
+            },
         })
 
         return NextResponse.json(tasks, { status: 200 })
