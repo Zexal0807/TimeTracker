@@ -4,6 +4,9 @@ import { prisma } from '@/lib/prisma'
 export async function GET() {
     try {
         const projects = await prisma.project.findMany({
+            include: {
+                client: true
+            }
         })
 
         return NextResponse.json(projects, { status: 200 })

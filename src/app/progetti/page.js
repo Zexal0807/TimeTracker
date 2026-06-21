@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { formatCurrency } from "@/lib/format";
 
 const PRESET_COLORS = [
     "#3b82f6",
@@ -145,13 +146,21 @@ function ProjectRow({ project, updateProject, deleteProject, clients }) {
                 className="h-3 w-3 rounded-full"
                 style={{ background: project.color }}
             />
-            <div className="flex-1 font-medium">{project.name}</div>
+            <div className="flex-1 min-w-0">
+                <div className="font-medium truncate">{project.name}</div>
+                <div className="text-xs text-muted-foreground">
+                    {project.client?.name ?? "—"}
+                </div>
+            </div>
+            <div className="text-sm text-muted-foreground tabular-nums">
+                {formatCurrency(Number(project.hourlyRate))} /h
+            </div>
             <ProjectDialog mode="edit" project={project} onSubmit={updateProject} clients={clients} />
             <Button
                 size="icon"
                 variant="ghost"
                 onClick={() => {
-                    if (confirm(`Eliminare "${project.name}"? Verranno rimossi anche le attività.`)) {
+                    if (confirm(`Eliminare "${project.name}"? Verranno rimosse anche le attività.`)) {
                         deleteProject(project)
                     }
                 }}
