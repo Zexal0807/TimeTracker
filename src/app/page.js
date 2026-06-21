@@ -327,6 +327,21 @@ function TaskRow({ task, projects, updateTask, deleteTask, duplicateTask }) {
     );
 }
 
+function toDateTimeLocalValue(value) {
+    if (!value) return "";
+
+    const d = new Date(value);
+    const pad = (n) => String(n).padStart(2, "0");
+
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
+function fromDateTimeLocalValue(value) {
+    if (!value) return null;
+    return new Date(value).toISOString();
+}
+
+
 function TaskDialog({
     task,
     projects,
@@ -336,8 +351,8 @@ function TaskDialog({
 }) {
 
     const [name, setName] = useState(task.name ?? "");
-    const [startDateTime, setStartDateTime] = useState(task.startDateTime);
-    const [endDateTime, setEndDateTime] = useState(task.endDateTime);
+    const [startDateTime, setStartDateTime] = useState(toDateTimeLocalValue(task.startDateTime));
+    const [endDateTime, setEndDateTime] = useState(toDateTimeLocalValue(task.endDateTime));
     const [idProject, setIdProject] = useState(task.idProject ?? "");
     const [paid, setPaid] = useState(task.paid ?? false);
 

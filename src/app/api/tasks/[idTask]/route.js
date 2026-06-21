@@ -92,7 +92,11 @@ export async function PUT(request, { params }) {
                 idProject: Number(idProject),
             },
             include: {
-                project: true,
+                project: {
+                    include: {
+                        client: true
+                    }
+                },
             },
         })
 
