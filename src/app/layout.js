@@ -4,7 +4,7 @@ import "./globals.css";
 
 import { Sidebar, SidebarContent, SidebarHeader, SidebarInset, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarProvider } from "@/components/ui/sidebar";
 import Link from "next/link";
-import { Users } from "lucide-react";
+import { FolderKanban, Users } from "lucide-react";
 import { usePathname } from "next/navigation";
 
 export default function RootLayout({ children }) {
@@ -32,6 +32,14 @@ export default function RootLayout({ children }) {
                                         <Link href="/clienti">
                                             <Users className="h-4 w-4" />
                                             <span>Clienti</span>
+                                        </Link>
+                                    </SidebarMenuButton>
+                                </SidebarMenuItem>
+                                <SidebarMenuItem key="projects">
+                                    <SidebarMenuButton asChild tooltip="Progetti" isActive={isActive("/progetti")}>
+                                        <Link href="/progetti">
+                                            <FolderKanban className="h-4 w-4" />
+                                            <span>Progetti</span>
                                         </Link>
                                     </SidebarMenuButton>
                                 </SidebarMenuItem>
