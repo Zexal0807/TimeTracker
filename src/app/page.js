@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 
 import { formatCurrency, formatDuration } from "@/lib/format";
-import { Check, Copy, MoreHorizontal, Pencil, Trash2 } from "lucide-react";
+import { Check, Copy, MoreHorizontal, Pencil, Plus, Trash2 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react"
 
 function dayLabel(d) {
@@ -136,6 +136,8 @@ export default function HomePage() {
         setTasks((c) => c.filter(x => x.idTask != task.idTask));
     }
 
+    const [open, setOpen] = useState(false)
+
     return (
         <>
             <header className="flex items-center justify-between">
@@ -145,13 +147,22 @@ export default function HomePage() {
                         Traccia il tempo delle attività.
                     </p>
                 </div>
-                {/* <ClientDialog mode="create" onSubmit={createClient} /> */}
+                <TaskDialog
+                    task={{
+                        startDateTime: new Date().setHours(new Date().getHours() - 1),
+                        endDateTime: new Date()
+                    }}
+                    projects={projects}
+                    open={open}
+                    onOpenChange={setOpen}
+                    onSubmit={createTask}
+                />
+                <Button onClick={() => setOpen(true)}>
+                    <Plus className="h-4 w-4" />
+                    Nuova task
+                </Button>
             </header>
-            <Card className="divide-y mt-4 p-0 gap-0">
-                TRACKER
 
-                {JSON.stringify(tasks)}
-            </Card>
             <section className="mt-4 space-y-4">
                 <div className="flex items-baseline justify-between">
                     <h2 className="text-lg font-semibold">Ultime attività</h2>
@@ -340,7 +351,6 @@ function fromDateTimeLocalValue(value) {
     if (!value) return null;
     return new Date(value).toISOString();
 }
-
 
 function TaskDialog({
     task,

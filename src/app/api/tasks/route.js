@@ -68,7 +68,11 @@ export async function POST(request) {
                 idProject: Number(idProject),
             },
             include: {
-                project: true,
+                project: {
+                    include: {
+                        client: true
+                    }
+                },
             },
         })
 
