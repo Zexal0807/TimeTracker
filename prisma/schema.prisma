@@ -24,4 +24,17 @@ model Project {
 
     idClient        Int           
     client          Client          @relation(fields: [idClient], references: [idClient])
+
+    tasks           Task[]
+}
+
+model Task {
+    idTask          Int             @id @default(autoincrement())
+    name            String
+    startDateTime   DateTime
+    endDateTime     DateTime
+    paid            Boolean         @default(false)
+    
+    idProject       Int           
+    project         Project         @relation(fields: [idProject], references: [idProject])
 }
