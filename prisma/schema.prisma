@@ -10,7 +10,6 @@ generator client {
 model Client {
     idClient        Int             @id @default(autoincrement())
     name            String
-    color           String          @default("#3B82F6")
 
     projects        Project[]
 }

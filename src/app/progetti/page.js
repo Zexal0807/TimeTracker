@@ -4,7 +4,7 @@ import { Card } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button"
 import { useEffect, useState } from "react";
-import { Pencil, Plus, Trash2 } from "lucide-react";
+import { FolderKanban, Pencil, Plus, Trash2 } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -142,9 +142,8 @@ export default function ProjectsPage() {
 function ProjectRow({ project, updateProject, deleteProject, clients }) {
     return (
         <div className="flex items-center gap-3 px-4 py-3">
-            <span
-                className="h-3 w-3 rounded-full"
-                style={{ background: project.color }}
+            <FolderKanban className="h-6 w-6"
+                style={{ color: project.color }}
             />
             <div className="flex-1 min-w-0">
                 <div className="font-medium truncate">{project.name}</div>
