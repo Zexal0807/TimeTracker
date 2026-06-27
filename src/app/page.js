@@ -35,8 +35,25 @@ export default function HomePage() {
 
     const [tasks, setTasks] = useState([])
     const [projects, setProjects] = useState([])
+    const [clients, setClients] = useState([])
 
     useEffect(() => {
+        const fetchClients = async () => {
+            const response = await fetch(`/api/clients`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+
+            if (!response.ok) {
+                throw new Error(`Server error: ${response.status}`)
+            }
+
+            const data = await response.json();
+            setClients(data);
+        }
+        fetchClients();
         const fetchTasks = async () => {
             const response = await fetch(`/api/tasks`, {
                 method: 'GET',
@@ -71,9 +88,28 @@ export default function HomePage() {
         fetchProjects();
     }, [])
 
+    const [idClient, setIdClient] = useState("all");
+    const [idProject, setIdProject] = useState("all");
+
+    const filteredProjects = useMemo(
+        () => idClient == "all"
+            ? projects
+            : projects.filter((p) => p.idClient == idClient),
+        [projects, idClient]
+    );
+    const filtered = useMemo(() => {
+        return tasks.filter((e) => {
+            if (idClient !== "all" && e.project?.idClient !== idClient)
+                return false;
+            if (idProject !== "all" && e.idProject !== idProject)
+                return false;
+            return true;
+        });
+    }, [tasks, idClient, idProject]);
+
     const grouppedTasks = useMemo(() => {
         const map = new Map();
-        for (const e of tasks) {
+        for (const e of filtered) {
             const d = new Date(e.startDateTime);
             const key = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
             const g = map.get(key) ?? { date: d, entries: [], total: 0 };
@@ -84,7 +120,7 @@ export default function HomePage() {
         return Array.from(map.values()).sort(
             (a, b) => b.date.getTime() - a.date.getTime(),
         );
-    }, [tasks])
+    }, [filtered])
 
     const createTask = async (task) => {
         const response = await fetch(`/api/tasks`, {
@@ -167,6 +203,53 @@ export default function HomePage() {
                 <div className="flex items-baseline justify-between">
                     <h2 className="text-lg font-semibold">Ultime attività</h2>
                 </div>
+
+                {/* Filtri */}
+                <div className="grid gap-3 grid-cols-3">
+                    <div></div>
+                    <div>
+                        <Label>Cliente</Label>
+                        <Select
+                            value={idClient}
+                            onValueChange={(v) => {
+                                setIdClient(v);
+                                setIdProject("all");
+                            }}
+                        >
+                            <SelectTrigger className="w-full">
+                                <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="all">Tutti i clienti</SelectItem>
+                                {clients.map((c) => (
+                                    <SelectItem key={c.idClient} value={c.idClient}>
+                                        {c.name}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
+                    <div>
+                        <Label>Progetto</Label>
+                        <Select
+                            value={idProject}
+                            onValueChange={(v) => setIdProject(v)}
+                        >
+                            <SelectTrigger className="w-full">
+                                <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="all">Tutti i progetti</SelectItem>
+                                {filteredProjects.map((p) => (
+                                    <SelectItem key={p.idProject} value={p.idProject}>
+                                        {p.name} ({formatCurrency(p.hourlyRate)})
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
+                </div>
+
                 <div className="space-y-4">
                     {grouppedTasks.map((g) => (
                         <Card className="overflow-hidden p-0 gap-0" key={g.date}>
