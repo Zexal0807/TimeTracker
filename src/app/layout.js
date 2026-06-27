@@ -35,14 +35,14 @@ export default function RootLayout({ children }) {
                                         </Link>
                                     </SidebarMenuButton>
                                 </SidebarMenuItem>
-                                <SidebarMenuItem key="calendar">
+                                {/* <SidebarMenuItem key="calendar">
                                     <SidebarMenuButton asChild tooltip="Calendario" isActive={isActive("/calendario")}>
                                         <Link href="/calendario">
                                             <Calendar className="h-4 w-4" />
                                             <span>Calendario</span>
                                         </Link>
                                     </SidebarMenuButton>
-                                </SidebarMenuItem>
+                                </SidebarMenuItem> */}
                                 <SidebarMenuItem key="clients">
                                     <SidebarMenuButton asChild tooltip="Clienti" isActive={isActive("/clienti")}>
                                         <Link href="/clienti">
