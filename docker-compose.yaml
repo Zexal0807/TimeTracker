@@ -1,0 +1,17 @@
+version: "3.8"
+
+services:
+    nextjs:
+        build:
+            context: .
+            dockerfile: Dockerfile
+        ports:
+            - "3333:3000"
+        environment:
+            DATABASE_URL: "file:./file.db"
+            # NODE_ENV: "production"
+            # PORT: "3000"
+            # HOSTNAME: "0.0.0.0"
+        volumes:
+            - ./prisma/file.db:/app/file.db
+        restart: unless-stopped
