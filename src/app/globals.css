@@ -29,6 +29,7 @@
 	--color-input: var(--input);
 	--color-border: var(--border);
 	--color-success: var(--success);
+	--color-warning: var(--warning);
 	--color-success-foreground: var(--success-foreground);
 	--color-destructive: var(--destructive);
 	--color-accent-foreground: var(--accent-foreground);
@@ -69,6 +70,7 @@
 	--accent: rgb(247, 247, 247);
 	--accent-foreground: rgb(52, 52, 52);
 	--success: rgb(22, 162, 73);
+	--warning: rgb(255, 193, 7);
 	--success-foreground: rgb(255, 255, 255);
 	--destructive: rgb(255, 71, 38);
 	--border: rgb(235, 235, 235);
