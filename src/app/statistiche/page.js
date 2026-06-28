@@ -191,9 +191,10 @@ export default function StatisticsPage() {
 
         const toDayKey = (value) => {
             const d = new Date(value);
+            const y = String(d.getFullYear())
             const m = String(d.getMonth() + 1).padStart(2, "0");
             const day = String(d.getDate()).padStart(2, "0");
-            return `${day}/${m}`;
+            return `${y}-${m}-${day}`;
         };
 
         const projectsMap = new Map();
@@ -210,7 +211,7 @@ export default function StatisticsPage() {
             }
         }
 
-        const daysCount = Math.floor((endDate.getTime() - startDate.getTime()) / dayMs) + 1;
+        const daysCount = Math.floor((endDate.getTime() - startDate.getTime()) / dayMs) + 1 + (range == "all" ? 1 : 0);
 
         const rows = Array.from({ length: daysCount }, (_, i) => {
             const current = new Date(startDate.getTime() + i * dayMs);
@@ -218,7 +219,7 @@ export default function StatisticsPage() {
 
             const row = {
                 dayKey,
-                date: dayKey,
+                date: current.toLocaleString().slice(0, 5),
                 total: 0,
             };
 
