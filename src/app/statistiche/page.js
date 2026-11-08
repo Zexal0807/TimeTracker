@@ -1,14 +1,45 @@
 "use client"
 
-import { Card } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import {
+    useEffect,
+    useMemo,
+    useState,
+} from 'react';
 
-import { formatCurrency, formatDuration } from "@/lib/format"
-import { AlertCircle, CheckCircle2, Clock, Euro } from "lucide-react"
-import { useEffect, useMemo, useState } from "react"
-import { Bar, BarChart, CartesianGrid, Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts"
+import {
+    AlertCircle,
+    CheckCircle2,
+    Clock,
+    Euro,
+} from 'lucide-react';
+import {
+    Bar,
+    BarChart,
+    CartesianGrid,
+    Cell,
+    Legend,
+    Pie,
+    PieChart,
+    ResponsiveContainer,
+    Tooltip,
+    XAxis,
+    YAxis,
+} from 'recharts';
+
+import { Card } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
+import {
+    formatCurrency,
+    formatDuration,
+} from '@/lib/format';
 
 function rangeBounds(range, from, to) {
     const now = new Date();
@@ -211,7 +242,9 @@ export default function StatisticsPage() {
             }
         }
 
-        const daysCount = Math.floor((endDate.getTime() - startDate.getTime()) / dayMs) + 1 + (range == "all" ? 1 : 0);
+        const daysCount = Math.floor((endDate.getTime() - startDate.getTime()) / dayMs) + 1
+            + (range == "all" ? 1 : 0)
+            + (range == "30d" ? 1 : 0);
 
         const rows = Array.from({ length: daysCount }, (_, i) => {
             const current = new Date(startDate.getTime() + i * dayMs);

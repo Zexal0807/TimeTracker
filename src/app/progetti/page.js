@@ -1,15 +1,38 @@
 "use client"
 
-import { Card } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button"
-import { useEffect, useState } from "react";
-import { FolderKanban, Pencil, Plus, Trash2 } from "lucide-react";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
-import { formatCurrency } from "@/lib/format";
+import {
+    useEffect,
+    useState,
+} from 'react';
+
+import {
+    FolderKanban,
+    Pencil,
+    Plus,
+    Trash2,
+} from 'lucide-react';
+
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import {
+    Dialog,
+    DialogContent,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
+import { formatCurrency } from '@/lib/format';
 
 const PRESET_COLORS = [
     "#3b82f6",
@@ -179,9 +202,31 @@ function ProjectDialog({
     const [open, setOpen] = useState(false);
     const [name, setName] = useState(project?.name ?? "");
     const [idClient, setIdClient] = useState(project?.idClient ?? "");
-    const [hourlyRate, setHourlRate] = useState(String(project?.hourly_rate ?? "28"));
+    const [hourlyRate, setHourlRate] = useState(String(project?.hourlyRate ?? "28"));
     const [color, setColor] = useState(project?.color ?? PRESET_COLORS[0]);
     const [notes, setNotes] = useState(project?.notes ?? "");
+    const [isLoading, setIsLoading] = useState(false);
+
+    const handleSubmit = async () => {
+        setIsLoading(true);
+        try {
+            await onSubmit({
+                idProject: project?.idProject,
+                name,
+                idClient,
+                color,
+                hourlyRate,
+                notes
+            });
+            setOpen(false);
+            if (mode === "create") {
+                setName("");
+                setNotes("");
+            }
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
@@ -206,7 +251,7 @@ function ProjectDialog({
                 <div className="space-y-4">
                     <div>
                         <Label>Cliente</Label>
-                        <Select value={idClient} onValueChange={setIdClient}>
+                        <Select value={idClient} onValueChange={setIdClient} disabled={isLoading}>
                             <SelectTrigger className="w-full">
                                 <SelectValue placeholder="Seleziona cliente" />
                             </SelectTrigger>
@@ -225,6 +270,7 @@ function ProjectDialog({
                             value={name}
                             onChange={(e) => setName(e.target.value)}
                             placeholder="Es. Creazione sito web"
+                            disabled={isLoading}
                         />
                     </div>
                     <div>
@@ -234,6 +280,7 @@ function ProjectDialog({
                             step="0.01"
                             value={hourlyRate}
                             onChange={(e) => setHourlRate(e.target.value)}
+                            disabled={isLoading}
                         />
                     </div>
                     <div>
@@ -249,6 +296,7 @@ function ProjectDialog({
                                         background: c,
                                         borderColor: color === c ? "var(--foreground)" : "transparent",
                                     }}
+                                    disabled={isLoading}
                                 />
                             ))}
                         </div>
@@ -260,24 +308,16 @@ function ProjectDialog({
                             onChange={(e) => setNotes(e.target.value)}
                             placeholder="Note interne sul progetto, link, contatti…"
                             rows={4}
+                            disabled={isLoading}
                         />
                     </div>
                 </div>
                 <DialogFooter>
                     <Button
-                        onClick={async () => {
-                            await onSubmit({
-                                idProject: project?.idProject,
-                                name,
-                                idClient,
-                                color,
-                                hourlyRate,
-                                notes
-                            });
-                            setOpen(false)
-                        }}
+                        onClick={handleSubmit}
+                        disabled={isLoading}
                     >
-                        Salva
+                        {isLoading ? "Salvataggio..." : "Salva"}
                     </Button>
                 </DialogFooter>
             </DialogContent>

@@ -1,18 +1,51 @@
 "use client"
 
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card"
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
+import {
+    useEffect,
+    useMemo,
+    useState,
+} from 'react';
 
-import { formatCurrency, formatDuration } from "@/lib/format";
-import { Check, Copy, MoreHorizontal, Pencil, Plus, Trash2 } from "lucide-react";
-import { useEffect, useMemo, useState } from "react"
+import {
+    Check,
+    Copy,
+    MoreHorizontal,
+    Pencil,
+    Plus,
+    Trash2,
+} from 'lucide-react';
+
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import {
+    Dialog,
+    DialogContent,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from '@/components/ui/dialog';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch';
+import {
+    formatCurrency,
+    formatDuration,
+} from '@/lib/format';
 
 function dayLabel(d) {
     const today = new Date();
@@ -32,10 +65,57 @@ function dayLabel(d) {
 }
 
 export default function HomePage() {
-
     const [tasks, setTasks] = useState([])
     const [projects, setProjects] = useState([])
     const [clients, setClients] = useState([])
+    const [selectedTaskIds, setSelectedTaskIds] = useState([]);
+
+    const toggleTaskSelection = (id) => {
+        setSelectedTaskIds((prev) =>
+            prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+        );
+    };
+
+    const totalSelectedDuration = useMemo(() => {
+        return selectedTaskIds.reduce((sum, id) => {
+            const task = tasks.find((t) => t.idTask === id);
+            if (task) {
+                const diff = new Date(task.endDateTime) - new Date(task.startDateTime);
+                return sum + diff / 1000;
+            }
+            return sum;
+        }, 0);
+    }, [selectedTaskIds, tasks]);
+
+    const handleBulkMarkPaid = async () => {
+        for (const id of selectedTaskIds) {
+            const task = tasks.find((t) => t.idTask === id);
+            if (task && !task.paid) {
+                await updateTask({ ...task, paid: true });
+            }
+        }
+        setSelectedTaskIds([]);
+    };
+
+    const handleBulkMarkUnpaid = async () => {
+        for (const id of selectedTaskIds) {
+            const task = tasks.find((t) => t.idTask === id);
+            if (task && task.paid) {
+                await updateTask({ ...task, paid: false });
+            }
+        }
+        setSelectedTaskIds([]);
+    };
+
+    const handleBulkChangeProject = async (projectId) => {
+        for (const id of selectedTaskIds) {
+            const task = tasks.find((t) => t.idTask === id);
+            if (task) {
+                await updateTask({ ...task, idProject: Number(projectId) });
+            }
+        }
+        setSelectedTaskIds([]);
+    };
 
     useEffect(() => {
         const fetchClients = async () => {
@@ -250,6 +330,23 @@ export default function HomePage() {
                     </div>
                 </div>
 
+                {/* Bulk actions toolbar sotto i filtri */}
+                {selectedTaskIds.length > 0 && (
+                    <div className="mt-3 bg-muted/50 rounded-lg border border-border flex items-center gap-2">
+                        <div className="flex-1 px-4 py-2.5 flex items-center gap-2">
+                            <span className="text-muted-foreground">Task selezionate:</span>
+                            <span className="font-semibold text-foreground">{selectedTaskIds.length}</span>
+                            <span className="text-muted-foreground">({formatDuration(totalSelectedDuration)})</span>
+                        </div>
+
+                        <div className="flex gap-2 flex-wrap">
+                            <Button variant="outline" size="sm" className="text-xs" onClick={handleBulkMarkPaid}>Segna come saldato</Button>
+                            <Button variant="outline" size="sm" className="text-xs" onClick={handleBulkMarkUnpaid}>Segna come da incassare</Button>
+                            <Button variant="ghost" size="sm" className="text-xs text-destructive" onClick={() => setSelectedTaskIds([])}>Annulla selezione</Button>
+                        </div>
+                    </div>
+                )}
+
                 <div className="space-y-4">
                     {grouppedTasks.map((g) => (
                         <Card className="overflow-hidden p-0 gap-0" key={g.date}>
@@ -270,6 +367,8 @@ export default function HomePage() {
                                         deleteTask={deleteTask}
                                         updateTask={updateTask}
                                         duplicateTask={() => { createTask({ ...task, paid: false }) }}
+                                        toggleTaskSelection={toggleTaskSelection}
+                                        isSelected={selectedTaskIds.includes(task.idTask)}
                                     />
                                 ))}
                             </div>
@@ -281,9 +380,9 @@ export default function HomePage() {
     );
 }
 
-function TaskRow({ task, projects, updateTask, deleteTask, duplicateTask }) {
+function TaskRow({ task, projects, updateTask, deleteTask, duplicateTask, toggleTaskSelection, isSelected }) {
 
-    const [startTime, setStartTime] = useState(task.startDateTime.substr(11, 8))
+    const [startTime, setStartTime] = useState("")
     useEffect(() => {
         if (!task.startDateTime) return setStartTime("");
 
@@ -293,7 +392,7 @@ function TaskRow({ task, projects, updateTask, deleteTask, duplicateTask }) {
         );
     }, [task.startDateTime]);
 
-    const [endTime, setEndTime] = useState(task.endDateTime.substr(11, 8))
+    const [endTime, setEndTime] = useState("")
     useEffect(() => {
         if (!task.endDateTime) return setEndTime("");
 
@@ -305,12 +404,35 @@ function TaskRow({ task, projects, updateTask, deleteTask, duplicateTask }) {
 
     const [editing, setEditing] = useState(false);
 
+    const [taskName, setTaskName] = useState(task.name);
+    useEffect(() => {
+        setTaskName(task.name);
+    }, [task.name]);
+
     return (
-        <div className="flex items-center gap-3 px-4 py-2.5 hover:bg-muted/40 transition-colors">
-            <div className="w-35/100">
-                {task.name}
+        <div className={`flex items-center gap-3 px-4 py-2.5 transition-colors ${isSelected ? 'bg-primary/5 hover:bg-primary/10' : 'hover:bg-muted/40'}`}>
+            <input
+                type="checkbox"
+                checked={isSelected}
+                onChange={() => toggleTaskSelection(task.idTask)}
+                className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+            />
+            <div className="flex-1 min-w-0">
+                <Input
+                    value={taskName}
+                    onChange={(e) => {
+                        setTaskName(e.target.value);
+                    }}
+                    onBlur={(e) => {
+                        const updatedTask = { ...task, name: taskName };
+                        if (taskName != task.name)
+                            updateTask(updatedTask);
+                    }}
+                    className="font-medium truncate focus:outline-none focus:ring-1 focus:ring-primary"
+                />
             </div>
-            <div className="w-50/100 flex items-center gap-3 justify-end">
+            <div className="flex items-center gap-3 justify-end">
+
                 <div className="flex items-center gap-2 text-sm min-w-0">
                     <span
                         className="inline-block h-2 w-2 rounded-full shrink-0"
@@ -370,7 +492,12 @@ function TaskRow({ task, projects, updateTask, deleteTask, duplicateTask }) {
                     {formatDuration(new Date(task.endDateTime) / 1000 - new Date(task.startDateTime) / 1000)}
                 </div>
             </div>
-            <div className="w-15/100 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+                {task.hourlyRate !== undefined && task.hourlyRate !== null && (
+                    <span className="text-xs text-muted-foreground font-mono">
+                        {formatCurrency(task.hourlyRate)}/h
+                    </span>
+                )}
                 {task.paid
                     ? (
                         <Badge className="bg-success text-success-foreground hover:bg-success/90">
@@ -381,6 +508,7 @@ function TaskRow({ task, projects, updateTask, deleteTask, duplicateTask }) {
                         <Badge variant="outline">Da incassare</Badge>
                     )
                 }
+
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                         <Button size="icon" variant="ghost" className="h-8 w-8">
@@ -425,9 +553,10 @@ function toDateTimeLocalValue(value) {
     if (!value) return "";
 
     const d = new Date(value);
-    const pad = (n) => String(n).padStart(2, "0");
-
-    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    // Convert to local time by offsetting
+    const offset = d.getTimezoneOffset() * 60000;
+    const localISOTime = (new Date(d.getTime() - offset)).toISOString().slice(0, 16);
+    return localISOTime;
 }
 
 function fromDateTimeLocalValue(value) {
@@ -442,18 +571,51 @@ function TaskDialog({
     onOpenChange,
     onSubmit
 }) {
-
     const [name, setName] = useState(task.name ?? "");
     const [startDateTime, setStartDateTime] = useState(toDateTimeLocalValue(task.startDateTime));
     const [endDateTime, setEndDateTime] = useState(toDateTimeLocalValue(task.endDateTime));
     const [idProject, setIdProject] = useState(task.idProject ?? "");
     const [paid, setPaid] = useState(task.paid ?? false);
+    const [hourlyRate, setHourlyRate] = useState(task.hourlyRate ?? "");
+    const [isLoading, setIsLoading] = useState(false);
+
+    // Aggiorna hourlyRate quando cambia il progetto (se è una nuova task)
+    useEffect(() => {
+        if (!task.idTask && idProject) {
+            const selectedProject = projects?.find((p) => String(p.idProject) === String(idProject));
+            if (selectedProject) {
+                setHourlyRate(String(selectedProject.hourlyRate));
+            }
+        }
+    }, [idProject, projects, task.idTask]);
+
+    const handleSubmit = async () => {
+        if (isLoading) return;
+        setIsLoading(true);
+        try {
+            const start = new Date(startDateTime).toISOString();
+            const end = new Date(endDateTime).toISOString();
+
+            await onSubmit({
+                ...task,
+                name,
+                startDateTime: start,
+                endDateTime: end,
+                idProject: Number(idProject),
+                hourlyRate: Number(hourlyRate),
+                paid
+            });
+            onOpenChange(false);
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent>
                 <DialogHeader>
-                    <DialogTitle>Modifica attività</DialogTitle>
+                    <DialogTitle>{task?.idTask ? "Modifica attività" : "Nuova attività"}</DialogTitle>
                 </DialogHeader>
                 <div className="space-y-4">
                     <div>
@@ -461,22 +623,33 @@ function TaskDialog({
                         <Input
                             value={name}
                             onChange={(e) => setName(e.target.value)}
+                            disabled={isLoading}
                         />
                     </div>
                     <div>
                         <Label>Progetto</Label>
-                        <Select value={idProject} onValueChange={setIdProject}>
+                        <Select value={idProject} onValueChange={setIdProject} disabled={isLoading}>
                             <SelectTrigger className="w-full">
                                 <SelectValue placeholder="Seleziona progetto" />
                             </SelectTrigger>
                             <SelectContent>
                                 {projects?.map((p) => (
-                                    <SelectItem key={p.idProject} value={p.idProject}>
-                                        {p.name} ({p.client.name}) - {formatCurrency(p.hourlyRate)}
+                                    <SelectItem key={p.idProject} value={String(p.idProject)}>
+                                        {p.name} ({p.client?.name})
                                     </SelectItem>
                                 ))}
                             </SelectContent>
                         </Select>
+                    </div>
+                    <div>
+                        <Label>Prezzo orario (€)</Label>
+                        <Input
+                            type="number"
+                            step="0.01"
+                            value={hourlyRate}
+                            onChange={(e) => setHourlyRate(e.target.value)}
+                            disabled={isLoading}
+                        />
                     </div>
                     <div className="grid grid-cols-2 gap-3">
                         <div>
@@ -485,6 +658,7 @@ function TaskDialog({
                                 type="datetime-local"
                                 value={startDateTime}
                                 onChange={(e) => setStartDateTime(e.target.value)}
+                                disabled={isLoading}
                             />
                         </div>
                         <div>
@@ -493,6 +667,7 @@ function TaskDialog({
                                 type="datetime-local"
                                 value={endDateTime}
                                 onChange={(e) => setEndDateTime(e.target.value)}
+                                disabled={isLoading}
                             />
                         </div>
                     </div>
@@ -502,24 +677,13 @@ function TaskDialog({
                             id="paid"
                             checked={paid}
                             onCheckedChange={setPaid}
+                            disabled={isLoading}
                         />
                     </div>
                 </div>
                 <DialogFooter>
-                    <Button
-                        onClick={() => {
-                            onSubmit({
-                                ...task,
-                                name,
-                                startDateTime,
-                                endDateTime,
-                                idProject,
-                                paid
-                            })
-                            onOpenChange(false)
-                        }}
-                    >
-                        Salva
+                    <Button onClick={handleSubmit} disabled={isLoading}>
+                        {isLoading ? "Salvataggio..." : "Salva"}
                     </Button>
                 </DialogFooter>
             </DialogContent>

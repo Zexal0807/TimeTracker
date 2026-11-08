@@ -135,6 +135,21 @@ function ClientDialog({
 }) {
     const [open, setOpen] = useState(false);
     const [name, setName] = useState(client?.name ?? "");
+    const [isLoading, setIsLoading] = useState(false);
+
+    const handleSubmit = async () => {
+        setIsLoading(true);
+        try {
+            await onSubmit({
+                idClient: client?.idClient,
+                name
+            });
+            setOpen(false);
+            if (mode === "create") setName("");
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
@@ -163,20 +178,16 @@ function ClientDialog({
                             value={name}
                             onChange={(e) => setName(e.target.value)}
                             placeholder="Es. Acme S.r.l."
+                            disabled={isLoading}
                         />
                     </div>
                 </div>
                 <DialogFooter>
                     <Button
-                        onClick={async () => {
-                            await onSubmit({
-                                idClient: client?.idClient,
-                                name
-                            });
-                            setOpen(false)
-                        }}
+                        onClick={handleSubmit}
+                        disabled={isLoading}
                     >
-                        Salva
+                        {isLoading ? "Salvataggio..." : "Salva"}
                     </Button>
                 </DialogFooter>
             </DialogContent>

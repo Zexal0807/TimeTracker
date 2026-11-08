@@ -1,5 +1,6 @@
-import { NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import { NextResponse } from 'next/server';
+
+import { prisma } from '@/lib/prisma';
 
 export async function GET() {
     try {
@@ -29,7 +30,7 @@ export async function GET() {
 export async function POST(request) {
     try {
         const body = await request.json()
-        const { name, startDateTime, endDateTime, paid, idProject } = body
+        const { name, startDateTime, endDateTime, paid, idProject, hourlyRate } = body
 
         if (!name || typeof name !== 'string') {
             return NextResponse.json(
@@ -52,12 +53,25 @@ export async function POST(request) {
             )
         }
 
+        if (!hourlyRate || isNaN(Number(hourlyRate))) {
+            return NextResponse.json(
+                { error: 'Il campo hourlyRate è obbligatorio e deve essere numerico' },
+                { status: 400 }
+            )
+        }
+
         if (!idProject || isNaN(Number(idProject))) {
             return NextResponse.json(
                 { error: 'Il campo idProject è obbligatorio e deve essere numerico' },
                 { status: 400 }
             )
         }
+
+        const project = await prisma.project.findUnique({
+            where: {
+                idProject: parseInt(idProject)
+            },
+        });
 
         const task = await prisma.task.create({
             data: {
@@ -66,6 +80,7 @@ export async function POST(request) {
                 endDateTime: new Date(endDateTime),
                 paid: typeof paid === 'boolean' ? paid : false,
                 idProject: Number(idProject),
+                hourlyRate: hourlyRate ?? project.hourlyRate
             },
             include: {
                 project: {
