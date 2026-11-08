@@ -634,7 +634,7 @@ function TaskDialog({
                             </SelectTrigger>
                             <SelectContent>
                                 {projects?.map((p) => (
-                                    <SelectItem key={p.idProject} value={String(p.idProject)}>
+                                    <SelectItem key={p.idProject} value={p.idProject}>
                                         {p.name} ({p.client?.name})
                                     </SelectItem>
                                 ))}
