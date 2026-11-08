@@ -17,7 +17,7 @@ CREATE TABLE "new_Task" (
     "idProject" INTEGER NOT NULL,
     CONSTRAINT "Task_idProject_fkey" FOREIGN KEY ("idProject") REFERENCES "Project" ("idProject") ON DELETE RESTRICT ON UPDATE CASCADE
 );
-INSERT INTO "new_Task" ("endDateTime", "idProject", "idTask", "name", "paid", "startDateTime") SELECT "endDateTime", "idProject", "idTask", "name", "paid", "startDateTime" FROM "Task";
+INSERT INTO "new_Task" ("endDateTime", "idProject", "idTask", "name", "paid", "startDateTime", "hourlyRate") SELECT "endDateTime", "idProject", "idTask", "name", "paid", "startDateTime", 28 FROM "Task";
 DROP TABLE "Task";
 ALTER TABLE "new_Task" RENAME TO "Task";
 PRAGMA foreign_keys=ON;
